@@ -13,3 +13,26 @@ mathematically to integer values. The distance matrix should be calculated just
 after reading an instance and then only the distance matrix (no nodes
 coordinates) should be accessed by optimization methods to allow instances
 defined only by distance matrices.
+
+
+## How to run
+
+### Build the project
+
+`mkdir build && cd build && cmake .. && make`
+
+### Run the solver
+
+When located in the "build" direcory run:
+
+`./samples/greedy/run N_SAMPLES ../data/TSPA.csv ../data/TSPB.csv`
+
+### Save results to file
+
+When located in the "build" direcory run:
+
+`./samples/greedy/run N_SAMPLES ../data/TSPA.csv ../data/TSPB.csv > results.csv`
+
+### Generate visualizations
+
+`python plot.py results.csv`
