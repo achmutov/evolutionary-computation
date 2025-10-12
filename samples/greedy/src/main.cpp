@@ -2,6 +2,7 @@
 #include <iostream>
 #include <evolutionary_computation/loader/csv.h>
 #include <evolutionary_computation/solver/random.h>
+#include <evolutionary_computation/solver/nearest_neighbor.h>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -29,6 +30,9 @@ int main(int argc, char* argv[]) {
 
     auto randomSolver= std::make_unique<RandomSolver>();
     solvers.push_back(randomSolver.get());
+
+    auto nearestNeighborSolver = std::make_unique<NearestNeighborSolver>();
+    solvers.push_back(nearestNeighborSolver.get());
 
     for (int i = 2; i < argc; i++) {
         auto const instancePath = argv[i];

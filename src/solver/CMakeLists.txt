@@ -3,4 +3,5 @@ target_sources(
     PRIVATE
         base.cpp
         random.cpp
+        nearest_neighbor.cpp
 )
