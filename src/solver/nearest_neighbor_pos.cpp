@@ -48,9 +48,9 @@ NearestNeighborPosSolver::Indices NearestNeighborPosSolver::_solve(int i) {
             auto before = indices[prevPos];
             auto after = indices[pos];
             auto delta =
-                this->data[j].cost
-                + this->distances[before][j]
-                + this->distances[j][after]
+                this->data[closest].cost
+                + this->distances[before][closest]
+                + this->distances[closest][after]
                 - this->distances[before][after];
 
             if (minDelta > delta) {
