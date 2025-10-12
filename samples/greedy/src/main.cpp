@@ -4,6 +4,7 @@
 #include <evolutionary_computation/solver/random.h>
 #include <evolutionary_computation/solver/nearest_neighbor.h>
 #include <evolutionary_computation/solver/nearest_neighbor_pos.h>
+#include <evolutionary_computation/solver/greedy_cycle.h>
 #include <limits>
 #include <memory>
 #include <stdexcept>
@@ -37,6 +38,9 @@ int main(int argc, char* argv[]) {
 
     auto nearestNeighborPosSolver = std::make_unique<NearestNeighborPosSolver>();
     solvers.push_back(nearestNeighborPosSolver.get());
+
+    auto greedyCycle = std::make_unique<GreedyCycle>();
+    solvers.push_back(greedyCycle.get());
 
     for (int i = 2; i < argc; i++) {
         auto const instancePath = argv[i];

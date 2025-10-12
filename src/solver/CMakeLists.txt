@@ -5,4 +5,5 @@ target_sources(
         random.cpp
         nearest_neighbor.cpp
         nearest_neighbor_pos.cpp
+        greedy_cycle.cpp
 )
