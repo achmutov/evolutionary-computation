@@ -23,15 +23,11 @@ defined only by distance matrices.
 
 ### Run the solver
 
-When located in the "build" direcory run:
-
-`./samples/greedy/run N_SAMPLES ../data/TSPA.csv ../data/TSPB.csv`
+`./build/samples/greedy/run 200 ./data/TSPA.csv ./data/TSPB.csv`
 
 ### Save results to file
 
-When located in the "build" direcory run:
-
-`./samples/greedy/run N_SAMPLES ../data/TSPA.csv ../data/TSPB.csv > results.csv`
+`./build/samples/greedy/run 200 ./data/TSPA.csv ./data/TSPB.csv > results.csv`
 
 ### Generate visualizations
 

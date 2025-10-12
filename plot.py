@@ -30,12 +30,33 @@ for (instance, method), row in inp.groupby(["instance", "method"]):
     indices_str = row["best_solution"].values[0]
     indices = [int(i) for i in indices_str.split(" ")]
 
-    sns.lineplot(instance_data.iloc[indices], x='x', y='y', c='lightgrey', sort=False, zorder=1, legend=False)
-    sns.lineplot(instance_data.iloc[[indices[0], indices[-1]]], x='x', y='y', c='lightgrey', sort=False, zorder=1, legend=False)
-    sns.scatterplot(instance_data, x='x', y='y', hue="cost", zorder=2, legend=False)
+    # Create complete cycle by adding first node at the end
+    cycle_indices = indices + [indices[0]]
+    
+    # Extract coordinates as simple arrays
+    x_coords = instance_data['x'].values
+    y_coords = instance_data['y'].values
+    costs = instance_data['cost'].values
+    
+    # Create path coordinates in correct order
+    path_x = [x_coords[idx] for idx in cycle_indices]
+    path_y = [y_coords[idx] for idx in cycle_indices]
+    
+    # Plot using matplotlib directly
+    plt.plot(path_x, path_y, 'k-', linewidth=1, zorder=1)
+    scatter = plt.scatter(x_coords, y_coords, c=costs, s=20, zorder=2, cmap='RdPu')
+    
+    # Add colorbar legend
+    cbar = plt.colorbar(scatter)
+    cbar.set_label('Node Cost', rotation=270, labelpad=15)
+    
+    # Add axis labels and title
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.title(f'{Path(instance).stem} - {method.replace("_", " ").title()} Solution')
 
     instance_path = Path(instance).with_suffix('')
     instance_plot_path = instance_path.with_stem(f"{instance_path.stem}-{method}").with_suffix(".png")
 
-    plt.savefig(instance_plot_path)
+    plt.savefig(instance_plot_path, dpi=300)
     plt.clf()
