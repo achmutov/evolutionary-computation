@@ -30,6 +30,7 @@ int Solver::cost(Indices const& indices) {
 
     for (int i = 1; i < indices.size(); i++)
         result += distances[indices[i - 1]][indices[i]];
+    result += distances[indices.front()][indices.back()];
 
     for (auto const i : indices)
         result += data[i].cost;
