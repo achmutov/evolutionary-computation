@@ -4,4 +4,5 @@ target_sources(
         base.cpp
         random.cpp
         nearest_neighbor.cpp
+        nearest_neighbor_pos.cpp
 )
