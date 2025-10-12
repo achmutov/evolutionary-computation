@@ -4,10 +4,13 @@
 #include <tuple>
 #include <vector>
 
-Solver::Solver(std::vector<Data> data) : data{data}, distances{toMatrix(data)} {}
+void Solver::init(std::vector<Data> const& data) {
+    this->data = data;
+    this->distances = toMatrix(data);
+}
 
-std::tuple<Solver::Indices, int> Solver::solve() {
-    auto indices = this->_solve();
+std::tuple<Solver::Indices, int> Solver::solve(int i) {
+    auto indices = this->_solve(i);
     auto cost = this->cost(indices);
     return std::make_tuple(indices, cost);
 }
@@ -25,7 +28,7 @@ std::vector<std::vector<int>> Solver::toMatrix(std::vector<Data> const& data) {
     return result;
 }
 
-int Solver::cost(Indices const& indices) {
+int Solver::cost(Indices const& indices) const {
     int result = 0;
 
     for (int i = 1; i < indices.size(); i++)

@@ -8,11 +8,12 @@
 
 class Solver {
 public:
-    Solver(std::vector<Data> data);
-
     typedef std::vector<int> Indices;
+    typedef std::vector<std::vector<int>> Distances;
 
-    virtual std::tuple<Indices, int> solve();
+    void init(std::vector<Data> const& data);
+    std::tuple<Indices, int> solve(int i);
+    virtual std::string name() const = 0;
 protected:
     std::vector<Data> data;
     std::vector<std::vector<int>> distances;
@@ -22,7 +23,7 @@ protected:
     static std::vector<std::vector<int>> toMatrix(std::vector<Data> const& data);
     static int euclideanDistance(int x1, int y1, int x2, int y2);
 
-    int cost(Indices const& indices);
+    int cost(Indices const& indices) const;
 
-    virtual Indices _solve() = 0;
+    virtual Indices _solve(int i) = 0;
 };

@@ -1,7 +1,11 @@
 #include <algorithm>
 #include <evolutionary_computation/solver/random.h>
 
-RandomSolver::Indices RandomSolver::_solve() {
+std::string RandomSolver::name() const {
+    return std::string("random");
+}
+
+RandomSolver::Indices RandomSolver::_solve(int i) {
     auto const n = this->data.size();
     auto indices = std::vector<int>(n);
 

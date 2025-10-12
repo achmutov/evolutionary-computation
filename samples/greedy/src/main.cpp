@@ -2,9 +2,12 @@
 #include <iostream>
 #include <evolutionary_computation/loader/csv.h>
 #include <evolutionary_computation/solver/random.h>
+#include <limits>
+#include <memory>
 #include <stdexcept>
 #include <ranges>
 #include <limits.h>
+#include <vector>
 
 int main(int argc, char* argv[]) {
     if (argc < 3) {
@@ -22,37 +25,50 @@ int main(int argc, char* argv[]) {
 
     std::cout << "instance,method,min,max,mean,best_solution\n";
 
+    auto solvers = std::vector<Solver*>();
+
+    auto randomSolver= std::make_unique<RandomSolver>();
+    solvers.push_back(randomSolver.get());
+
     for (int i = 2; i < argc; i++) {
         auto const instancePath = argv[i];
         auto stream = std::ifstream(instancePath);
         auto loader = CSVLoader(stream);
         auto data = loader.load();
-        auto solver = RandomSolver(data);
-        float minObj = INT_MAX;
-        float maxObj = -1;
-        float meanObj = 0;
-        Solver::Indices best;
-        for (int j = 0; j < n; j++) {
-            auto const [indices, candidate] = solver.solve();
-            auto const fcandidate = static_cast<float>(candidate);
-            maxObj = std::max(maxObj, fcandidate);
-            if (minObj < fcandidate) {
-                minObj = fcandidate;
-                best = indices;
+
+        for (auto solver : solvers) {
+            solver->init(data);
+            auto minObj = std::numeric_limits<int>::max();
+            auto maxObj = std::numeric_limits<int>::min();
+            float meanObj = 0;
+            Solver::Indices best;
+
+            for (int j = 0; j < n; j++) {
+                auto const [indices, candidate] = solver->solve(j);
+                maxObj = std::max(maxObj, candidate);
+                if (minObj < candidate) {
+                    minObj = candidate;
+                    best = indices;
+                }
+                minObj = std::min(minObj, candidate);
+                meanObj += candidate;
             }
-            minObj = std::min(minObj, static_cast<float>(candidate));
-            meanObj += candidate;
+            meanObj /= n;
+
+            // Rest of the stats
+            std::cout << instancePath
+                << ',' << solver->name()
+                << ',' << minObj
+                << ',' << maxObj
+                << ',' << meanObj
+                << ',';
+
+            // Best indices
+            auto const allButLast = best | std::ranges::views::take(best.size() - 1);
+            for (auto const& index : allButLast)
+                std::cout << index << ' ';
+            std::cout << best.back() << "\n";
         }
-        meanObj /= n;
-
-        // Rest of the stats
-        std::cout << instancePath << ",random," << minObj << ',' << maxObj << ',' << meanObj << ',';
-
-        // Best indices
-        auto const allButLast = best | std::ranges::views::take(best.size() - 1);
-        for (auto const& index : allButLast)
-            std::cout << index << ';';
-        std::cout << best.back() << "\n";
     }
     return 0;
 }
