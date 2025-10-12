@@ -18,9 +18,11 @@ std::tuple<Solver::Indices, int> Solver::solve(int i) {
 std::vector<std::vector<int>> Solver::toMatrix(std::vector<Data> const& data) {
     auto result = std::vector<std::vector<int>>(data.size());
 
-    for (auto const [i, a] : data | std::ranges::views::enumerate) {
+    for (size_t i = 0; i < data.size(); ++i) {
+        auto const& a = data[i];
         result[i] = std::vector<int>(data.size());
-        for (auto const [j, b] : data | std::ranges::views::enumerate) {
+        for (size_t j = 0; j < data.size(); ++j) {
+            auto const& b = data[j];
             result[i][j] = euclideanDistance(a.x, a.y, b.x, b.y);
         }
     }

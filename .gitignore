@@ -1,2 +1,6 @@
 build/
 .cache/
+.DS_Store
+src/.DS_Store
+data/
+results.csv

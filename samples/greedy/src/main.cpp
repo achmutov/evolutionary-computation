@@ -54,7 +54,7 @@ int main(int argc, char* argv[]) {
             for (int j = 0; j < n; j++) {
                 auto const [indices, candidate] = solver->solve(j);
                 maxObj = std::max(maxObj, candidate);
-                if (minObj < candidate) {
+                if (candidate < minObj) {
                     minObj = candidate;
                     best = indices;
                 }
