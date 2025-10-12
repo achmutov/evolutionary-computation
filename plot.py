@@ -7,6 +7,7 @@
 # ///
 
 import sys
+from pathlib import Path
 
 if len(sys.argv) == 1:
     cmd = sys.argv[0]
@@ -29,7 +30,12 @@ for (instance, method), row in inp.groupby(["instance", "method"]):
     indices_str = row["best_solution"].values[0]
     indices = [int(i) for i in indices_str.split(" ")]
 
-    sns.lineplot(instance_data.iloc[indices], x='x', y='y', c='lightgrey', sort=False, zorder=1)
-    sns.lineplot(instance_data.iloc[[indices[0], indices[-1]]], x='x', y='y', c='lightgrey', sort=False, zorder=1)
-    sns.scatterplot(instance_data, x='x', y='y', hue="cost", zorder=2)
-    plt.show()
+    sns.lineplot(instance_data.iloc[indices], x='x', y='y', c='lightgrey', sort=False, zorder=1, legend=False)
+    sns.lineplot(instance_data.iloc[[indices[0], indices[-1]]], x='x', y='y', c='lightgrey', sort=False, zorder=1, legend=False)
+    sns.scatterplot(instance_data, x='x', y='y', hue="cost", zorder=2, legend=False)
+
+    instance_path = Path(instance).with_suffix('')
+    instance_plot_path = instance_path.with_stem(f"{instance_path.stem}-{method}").with_suffix(".png")
+
+    plt.savefig(instance_plot_path)
+    plt.clf()
