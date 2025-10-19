@@ -7,7 +7,7 @@ class GreedyCycle : public Solver {
 public:
     using Solver::Solver;
 
-    GreedyCycle(Mode mode);
+    GreedyCycle(Mode mode = Mode::None);
 
     virtual std::string name() const override;
 protected:

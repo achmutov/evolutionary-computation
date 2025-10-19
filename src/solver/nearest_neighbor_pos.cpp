@@ -1,6 +1,7 @@
 #include <evolutionary_computation/solver/nearest_neighbor_pos.h>
 
-NearestNeighborPosSolver::NearestNeighborPosSolver(Mode mode = Mode::None) : mode {mode} {}
+NearestNeighborPosSolver::NearestNeighborPosSolver(Mode mode, double alpha, double beta) 
+    : mode {mode}, alpha {alpha}, beta {beta} {}
 
 std::string NearestNeighborPosSolver::name() const {
     auto result = std::string("nearest_neighbor_pos");
@@ -102,7 +103,7 @@ std::tuple<int, int> NearestNeighborPosSolver::next_regret(Indices& indices, std
     for (int j = 0; j < visited.size(); ++j) {
         if (visited[j]) continue;
         auto [currentMinDelta, currentBestPos, currentRegret] = this->get_regret(j, indices);
-        if (currentRegret > maxRegret || currentMinDelta < minCostForMaxRegretCity) {
+        if (currentRegret > maxRegret || currentRegret == maxRegret && currentMinDelta < minCostForMaxRegretCity) {
             maxRegret = currentRegret;
             bestCity = j;
             bestPos = currentBestPos;
@@ -122,8 +123,9 @@ std::tuple<int, int> NearestNeighborPosSolver::next_weighted_regret(Indices& ind
     for (int j = 0; j < visited.size(); ++j) {
         if (visited[j]) continue;
         auto [currentMinDelta, currentBestPos, currentRegret] = this->get_regret(j, indices);
-        auto score = currentRegret - currentMinDelta;
-        if (score > maxScore || currentMinDelta < minDeltaForMaxRegret) {
+        // Weighted regret: α * regret + β * (-best_cost)
+        auto score = this->alpha * currentRegret + this->beta * (-currentMinDelta);
+        if (score > maxScore || score == maxScore && currentMinDelta < minDeltaForMaxRegret) {
             maxScore = score;
             bestCity = j;
             bestPos = currentBestPos;

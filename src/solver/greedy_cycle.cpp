@@ -1,6 +1,6 @@
 #include <evolutionary_computation/solver/greedy_cycle.h>
 
-GreedyCycle::GreedyCycle(Mode mode = Mode::None) : mode {mode} {}
+GreedyCycle::GreedyCycle(Mode mode) : mode {mode} {}
 
 std::string GreedyCycle::name() const {
     auto result = std::string("greedy_cycle");
