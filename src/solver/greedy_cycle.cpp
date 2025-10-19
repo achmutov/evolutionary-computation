@@ -1,6 +1,7 @@
 #include <evolutionary_computation/solver/greedy_cycle.h>
 
-GreedyCycle::GreedyCycle(Mode mode) : mode {mode} {}
+GreedyCycle::GreedyCycle(Mode mode, double alpha, double beta) 
+    : mode {mode}, alpha {alpha}, beta {beta} {}
 
 std::string GreedyCycle::name() const {
     auto result = std::string("greedy_cycle");
@@ -96,7 +97,7 @@ std::tuple<int, int> GreedyCycle::next_regret(Indices& indices, std::vector<bool
     for (int j = 0; j < visited.size(); ++j) {
         if (visited[j]) continue;
         auto [currentMinDelta, currentBestPos, currentRegret] = this->get_regret(j, indices);
-        if (currentRegret > maxRegret || currentMinDelta < minCostForMaxRegretCity) {
+        if (currentRegret > maxRegret || (currentRegret == maxRegret && currentMinDelta < minCostForMaxRegretCity)) {
             maxRegret = currentRegret;
             bestCity = j;
             bestPos = currentBestPos;
@@ -110,14 +111,15 @@ std::tuple<int, int> GreedyCycle::next_regret(Indices& indices, std::vector<bool
 std::tuple<int, int> GreedyCycle::next_weighted_regret(Indices& indices, std::vector<bool>& visited) {
     int bestCity = -1;
     int bestPos = -1;
-    int maxScore = -1;
+    int maxScore = std::numeric_limits<int>::min();
     auto minDeltaForMaxRegret = std::numeric_limits<int>::max();
 
     for (int j = 0; j < visited.size(); ++j) {
         if (visited[j]) continue;
         auto [currentMinDelta, currentBestPos, currentRegret] = this->get_regret(j, indices);
-        auto score = currentRegret - currentMinDelta;
-        if (score > maxScore || currentMinDelta < minDeltaForMaxRegret) {
+        // Weighted regret: α * regret + β * (-best_cost)
+        auto score = this->alpha * currentRegret + this->beta * (-currentMinDelta);
+        if (score > maxScore || (score == maxScore && currentMinDelta < minDeltaForMaxRegret)) {
             maxScore = score;
             bestCity = j;
             bestPos = currentBestPos;

@@ -117,7 +117,7 @@ std::tuple<int, int> NearestNeighborPosSolver::next_regret(Indices& indices, std
 std::tuple<int, int> NearestNeighborPosSolver::next_weighted_regret(Indices& indices, std::vector<bool>& visited) {
     int bestCity = -1;
     int bestPos = -1;
-    int maxScore = -1;
+    int maxScore = std::numeric_limits<int>::min();
     auto minDeltaForMaxRegret = std::numeric_limits<int>::max();
 
     for (int j = 0; j < visited.size(); ++j) {

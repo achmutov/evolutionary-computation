@@ -7,11 +7,12 @@ class GreedyCycle : public Solver {
 public:
     using Solver::Solver;
 
-    GreedyCycle(Mode mode = Mode::None);
+    GreedyCycle(Mode mode = Mode::None, double alpha = 1.0, double beta = 1.0);
 
     virtual std::string name() const override;
 protected:
     Mode mode;
+    double alpha, beta;
 
     virtual Indices _solve(int i) override;
 
