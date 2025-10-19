@@ -1,0 +1,2 @@
+add_executable(greedy_regret src/main.cpp)
+target_link_libraries(greedy_regret PRIVATE evolutionary_computation)
