@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <cmath>
 #include <random>
 #include <tuple>
@@ -10,9 +11,10 @@ class Solver {
 public:
     typedef std::vector<int> Indices;
     typedef std::vector<std::vector<int>> Distances;
+    typedef std::chrono::high_resolution_clock::duration Duration;
 
     void init(std::vector<Data> const& data);
-    std::tuple<Indices, int> solve(int i);
+    virtual std::tuple<Indices, int, Duration> solve(int i);
     virtual std::string name() const = 0;
 protected:
     std::vector<Data> data;

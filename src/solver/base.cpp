@@ -3,16 +3,20 @@
 #include <ranges>
 #include <tuple>
 #include <vector>
+#include <chrono>
 
 void Solver::init(std::vector<Data> const& data) {
     this->data = data;
     this->distances = toMatrix(data);
 }
 
-std::tuple<Solver::Indices, int> Solver::solve(int i) {
+std::tuple<Solver::Indices, int, Solver::Duration> Solver::solve(int i) {
+    auto clock = std::chrono::high_resolution_clock();
+    auto start = clock.now();
     auto indices = this->_solve(i);
+    auto duration  = clock.now() - start;
     auto cost = this->cost(indices);
-    return std::make_tuple(indices, cost);
+    return std::make_tuple(indices, cost, duration);
 }
 
 std::vector<std::vector<int>> Solver::toMatrix(std::vector<Data> const& data) {

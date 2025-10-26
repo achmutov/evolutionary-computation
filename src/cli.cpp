@@ -1,8 +1,10 @@
+#include <chrono>
 #include <evolutionary_computation/cli.h>
 #include <iostream>
 #include <fstream>
 #include <evolutionary_computation/loader/csv.h>
 #include <ranges>
+#include <ratio>
 
 void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
     if (argc < 3) {
@@ -18,7 +20,7 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
         std::exit(64);
     }
 
-    std::cout << "instance,method,min,max,mean,best_solution\n";
+    std::cout << "instance,method,min,max,mean,duration_min,duration_max,duration_mean,best_solution\n";
 
     for (int i = 2; i < argc; i++) {
         auto const instancePath = argv[i];
@@ -32,9 +34,12 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
             auto maxObj = std::numeric_limits<int>::min();
             float meanObj = 0;
             Solver::Indices best;
+            Solver::Duration minDuration = std::chrono::nanoseconds::max();
+            Solver::Duration meanDuration = std::chrono::nanoseconds(0);
+            Solver::Duration maxDuration = std::chrono::nanoseconds::min();
 
             for (int j = 0; j < n; j++) {
-                auto const [indices, candidate] = solver->solve(j);
+                auto const [indices, candidate, duration] = solver->solve(j);
                 maxObj = std::max(maxObj, candidate);
                 if (candidate < minObj) {
                     minObj = candidate;
@@ -42,8 +47,14 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
                 }
                 minObj = std::min(minObj, candidate);
                 meanObj += candidate;
+
+                minDuration = std::min(minDuration, duration);
+                maxDuration = std::max(maxDuration, duration);
+                meanDuration += duration;
+
             }
             meanObj /= n;
+            meanDuration /= n;
 
             // Rest of the stats
             std::cout << instancePath
@@ -51,6 +62,9 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
                 << ',' << minObj
                 << ',' << maxObj
                 << ',' << meanObj
+                << ',' << std::chrono::duration<double, std::milli>(minDuration).count()
+                << ',' << std::chrono::duration<double, std::milli>(maxDuration).count()
+                << ',' << std::chrono::duration<double, std::milli>(meanDuration).count()
                 << ',';
 
             // Best indices
