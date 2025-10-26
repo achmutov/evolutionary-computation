@@ -7,6 +7,5 @@ public:
     using Solver::Solver;
 
     virtual std::string name() const override;
-protected:
     virtual Indices _solve(int i) override;
 };

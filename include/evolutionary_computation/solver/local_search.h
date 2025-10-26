@@ -30,12 +30,12 @@ public:
 
     virtual std::string name() const override;
     virtual void init(Data const& data) override;
+    virtual Indices _solve(int i) override;
 protected:
     const LocalSearchType localSearchType;
     const IntraNeighborhoodType intraNeighborhoodType;
     Solver& initSolver;
 
-    virtual Indices _solve(int i) override;
     void doGreedy(Indices& solution);
     void doSteep(Indices& solution);
 

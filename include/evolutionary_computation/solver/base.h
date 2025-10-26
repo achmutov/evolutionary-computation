@@ -15,6 +15,7 @@ public:
 
     virtual void init(Data const& data);
     virtual std::tuple<Indices, int, Duration> solve(int i);
+    virtual Indices _solve(int i) = 0;
     virtual std::string name() const = 0;
 
     virtual ~Solver() = default;
@@ -28,6 +29,4 @@ protected:
     static int euclideanDistance(int x1, int y1, int x2, int y2);
 
     int cost(Indices const& indices) const;
-
-    virtual Indices _solve(int i) = 0;
 };

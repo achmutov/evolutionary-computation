@@ -1,4 +1,5 @@
 #include "evolutionary_computation/data.h"
+#include <fstream>
 #include <sstream>
 #include <string>
 #include <evolutionary_computation/loader/csv.h>
@@ -25,5 +26,5 @@ Data CSVLoader::load() {
         result.push_back(data);
     }
 
-    return Data { result };
+    return Data { result, this->filename };
 }

@@ -23,7 +23,7 @@ void LocalSearchSolver::init(Data const& data) {
 }
 
 LocalSearchSolver::Indices LocalSearchSolver::_solve(int i) {
-    auto [currentSolution, _cost, _duration] = this->initSolver.solve(i);
+    auto currentSolution = this->initSolver._solve(i);
 
     int currentCost = std::numeric_limits<int>::max();
     int lastCost;

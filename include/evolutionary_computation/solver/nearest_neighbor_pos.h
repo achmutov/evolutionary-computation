@@ -10,11 +10,10 @@ public:
     NearestNeighborPosSolver(Mode mode = Mode::None, double alpha = 1.0, double beta = 1.0);
 
     virtual std::string name() const override;
+    virtual Indices _solve(int i) override;
 protected:
     Mode mode;
     double alpha, beta;
-
-    virtual Indices _solve(int i) override;
 
     int get_delta(int city, int pos, Indices& indices);
     std::tuple<int, int> next_greedy(Indices& indices, std::vector<bool>& visited);
