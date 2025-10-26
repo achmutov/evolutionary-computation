@@ -13,19 +13,23 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
     }
 
     int n{};
+#ifdef EXCEPTIONS
     try {
+#endif
         n = std::stoi(argv[1]);
+#ifdef EXCEPTIONS
     } catch (std::invalid_argument) {
         std::cerr << "Error: N_SAMPLES must be a valid integer" << std::endl;
         std::exit(64);
     }
+#endif
 
     std::cout << "instance,method,min,max,mean,duration_min,duration_max,duration_mean,best_solution\n";
 
     for (int i = 2; i < argc; i++) {
         auto const instancePath = argv[i];
         auto stream = std::ifstream(instancePath);
-        auto loader = CSVLoader(stream);
+        auto loader = CSVLoader(stream, instancePath);
         auto data = loader.load();
 
         for (auto solver : solvers) {
