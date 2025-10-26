@@ -13,7 +13,7 @@ std::string GreedyCycle::name() const {
 }
 
 GreedyCycle::Indices GreedyCycle::_solve(int i) {
-    auto const n = this->data.size();
+    auto const n = this->data.entries.size();
     auto const half = static_cast<Indices::size_type>(std::round(static_cast<float>(n) / 2));
 
     auto visited = std::vector<bool>(n, false);
@@ -41,7 +41,7 @@ GreedyCycle::Indices GreedyCycle::_solve(int i) {
 int GreedyCycle::get_delta(int city, int pos, Indices& indices) {
     auto before = indices[pos - 1];
     auto after = indices[pos % indices.size()];
-    return this->data[city].cost
+    return this->data.entries[city].cost
         + this->distances[before][city]
         + this->distances[city][after]
         - this->distances[before][after];

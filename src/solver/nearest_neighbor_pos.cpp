@@ -13,7 +13,7 @@ std::string NearestNeighborPosSolver::name() const {
 }
 
 NearestNeighborPosSolver::Indices NearestNeighborPosSolver::_solve(int i) {
-    auto const n = this->data.size();
+    auto const n = this->data.entries.size();
     auto const half = static_cast<Indices::size_type>(std::round(static_cast<float>(n) / 2));
 
     auto visited = std::vector<bool>(n, false);
@@ -41,14 +41,14 @@ NearestNeighborPosSolver::Indices NearestNeighborPosSolver::_solve(int i) {
 int NearestNeighborPosSolver::get_delta(int city, int pos, Indices& indices) {
     if (pos == 0) {
         auto after = indices[pos];
-        return this->data[city].cost + this->distances[city][after];
+        return this->data.entries[city].cost + this->distances[city][after];
     } else if (pos == indices.size()) {
         auto before = indices[pos - 1];
-        return this->data[city].cost + this->distances[before][city];
+        return this->data.entries[city].cost + this->distances[before][city];
     }
     auto before = indices[pos - 1];
     auto after = indices[pos];
-    return this->data[city].cost
+    return this->data.entries[city].cost
         + this->distances[before][city]
         + this->distances[city][after]
         - this->distances[before][after];

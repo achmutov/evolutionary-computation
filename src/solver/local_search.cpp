@@ -17,7 +17,7 @@ std::string LocalSearchSolver::name() const {
         + "init_" + initSolver.name();
 }
 
-void LocalSearchSolver::init(std::vector<Data> const& data) {
+void LocalSearchSolver::init(Data const& data) {
     Solver::init(data);
     this->initSolver.init(data);
 }
@@ -73,7 +73,7 @@ void LocalSearchSolver::doSteep(Indices& solution) {
 }
 
 std::vector<LocalSearchSolver::Move> LocalSearchSolver::getMoves(Indices const& solution) {
-    auto n = this->data.size();
+    auto n = this->data.entries.size();
     auto sn = solution.size();
     auto moves = std::vector<Move>();
     moves.reserve(
@@ -146,7 +146,7 @@ int LocalSearchSolver::evalMove(Indices const& solution, Move& move) {
 }
 
 int LocalSearchSolver::getDelta(int target, int city1, int city2) {
-    return this->data[target].cost
+    return this->data.entries[target].cost
         + this->distances[city1][target]
         + this->distances[target][city2];
 }

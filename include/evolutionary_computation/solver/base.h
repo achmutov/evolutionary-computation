@@ -13,18 +13,18 @@ public:
     typedef std::vector<std::vector<int>> Distances;
     typedef std::chrono::high_resolution_clock::duration Duration;
 
-    virtual void init(std::vector<Data> const& data);
+    virtual void init(Data const& data);
     virtual std::tuple<Indices, int, Duration> solve(int i);
     virtual std::string name() const = 0;
 
     virtual ~Solver() = default;
 protected:
-    std::vector<Data> data;
+    Data data;
     std::vector<std::vector<int>> distances;
 
     static std::mt19937 mt;
 
-    static std::vector<std::vector<int>> toMatrix(std::vector<Data> const& data);
+    static std::vector<std::vector<int>> toMatrix(Data const& data);
     static int euclideanDistance(int x1, int y1, int x2, int y2);
 
     int cost(Indices const& indices) const;

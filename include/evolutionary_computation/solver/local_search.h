@@ -29,7 +29,7 @@ public:
 
 
     virtual std::string name() const override;
-    virtual void init(std::vector<Data> const& data) override;
+    virtual void init(Data const& data) override;
 protected:
     const LocalSearchType localSearchType;
     const IntraNeighborhoodType intraNeighborhoodType;

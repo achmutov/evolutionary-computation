@@ -7,7 +7,7 @@ std::string RandomSolver::name() const {
 }
 
 RandomSolver::Indices RandomSolver::_solve(int i) {
-    auto const n = this->data.size();
+    auto const n = this->data.entries.size();
     auto indices = std::vector<int>(n);
 
     std::iota(indices.begin(), indices.end(), 0);

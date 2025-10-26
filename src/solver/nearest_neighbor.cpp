@@ -5,7 +5,7 @@ std::string NearestNeighborSolver::name() const {
 }
 
 NearestNeighborSolver::Indices NearestNeighborSolver::_solve(int i) {
-    auto const n = this->data.size();
+    auto const n = this->data.entries.size();
     auto const half = static_cast<Indices::size_type>(std::round(static_cast<float>(n) / 2));
 
     auto visited = std::vector<bool>(n, false);
@@ -21,7 +21,7 @@ NearestNeighborSolver::Indices NearestNeighborSolver::_solve(int i) {
         auto minObj = std::numeric_limits<double>::max();
 
         for (int candidate = 0; candidate < n; candidate++) {
-            auto const currentObj = this->distances[current][candidate] + this->data[candidate].cost;
+            auto const currentObj = this->distances[current][candidate] + this->data.entries[candidate].cost;
             if (!visited[candidate] && currentObj < minObj) {
                 minObj = currentObj;
                 next = candidate;

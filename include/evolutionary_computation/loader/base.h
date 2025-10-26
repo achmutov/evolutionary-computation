@@ -8,7 +8,7 @@ class FileLoader {
 public:
     FileLoader(std::ifstream& file);
 
-    virtual std::vector<Data> load() = 0;
+    virtual Data load() = 0;
 protected:
     std::ifstream& file;
 };
