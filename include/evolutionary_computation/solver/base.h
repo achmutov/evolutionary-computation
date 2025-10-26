@@ -13,9 +13,11 @@ public:
     typedef std::vector<std::vector<int>> Distances;
     typedef std::chrono::high_resolution_clock::duration Duration;
 
-    void init(std::vector<Data> const& data);
+    virtual void init(std::vector<Data> const& data);
     virtual std::tuple<Indices, int, Duration> solve(int i);
     virtual std::string name() const = 0;
+
+    virtual ~Solver() = default;
 protected:
     std::vector<Data> data;
     std::vector<std::vector<int>> distances;

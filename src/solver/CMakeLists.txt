@@ -6,4 +6,5 @@ target_sources(
         nearest_neighbor.cpp
         nearest_neighbor_pos.cpp
         greedy_cycle.cpp
+        local_search.cpp
 )

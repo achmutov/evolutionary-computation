@@ -1,0 +1,2 @@
+add_executable(local_search src/main.cpp)
+target_link_libraries(local_search PRIVATE evolutionary_computation)
