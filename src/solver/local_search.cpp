@@ -123,6 +123,11 @@ int LocalSearchSolver::evalMove(Indices const& solution, Move& move) {
                 auto newEdges = this->distances[beforeFirst][second] + this->distances[first][afterSecond];
                 auto oldEdges = this->distances[beforeFirst][first] + this->distances[second][afterSecond];
                 return newEdges - oldEdges;
+            }
+            else if (second == beforeFirst) {
+                auto oldEdges = this->distances[beforeFirst][second] + this->distances[first][afterSecond];
+                auto newEdges = this->distances[beforeFirst][first] + this->distances[second][afterSecond];
+                return newEdges - oldEdges;
             } else {
                 auto firstOld = this->distances[beforeFirst][first] + this->distances[first][afterFirst];
                 auto secondOld = this->distances[beforeSecond][second] + this->distances[second][afterSecond];
@@ -134,6 +139,7 @@ int LocalSearchSolver::evalMove(Indices const& solution, Move& move) {
             }
         }
         case MoveType::Edges: {
+            if (a == 0 && b == solution.size() - 1) return 0;
             auto first = solution[a];
             auto second = solution[b];
             auto beforeFirst = solution[(a + solution.size() - 1) % solution.size()];
