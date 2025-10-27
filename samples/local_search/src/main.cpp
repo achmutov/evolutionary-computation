@@ -14,7 +14,6 @@ public:
             auto value = data.filename.value();
             auto lowered = std::string(value);
             std::transform(value.begin(), value.end(), lowered.begin(), [](char c) { return std::tolower(c); });
-            std::cout << value << ' ' << lowered << '\n';
             if (lowered.contains("tspa")) {
                 // this->solver = std::make_unique<NearestNeighborPosSolver>(Mode::WeightedRegret);
                 this->solver = std::make_unique<NearestNeighborPosSolver>();
