@@ -6,6 +6,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 if(CMAKE_BUILD_TYPE MATCHES Release)
+    set(CMAKE_UNITY_BUILD ON)
+    set(CMAKE_UNITY_BUILD_BATCH_SIZE 1000)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(
             -O3
@@ -14,6 +16,7 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
             -fno-exceptions
             -fno-rtti
             -DNDEBUG
+            -flto
         )
         add_link_options(-flto)
     endif()
