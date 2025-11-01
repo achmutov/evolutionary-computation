@@ -1,0 +1,35 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "debug",
+      "hidden": false,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "hidden": false,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/release",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "release",
+      "jobs": -1,
+      "configurePreset": "release"
+    },
+    {
+      "name": "debug",
+      "jobs": -1,
+      "configurePreset": "debug"
+    }
+  ]
+}
