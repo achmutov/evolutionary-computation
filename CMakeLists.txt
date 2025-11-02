@@ -10,7 +10,7 @@ if(CMAKE_BUILD_TYPE MATCHES Release)
     set(CMAKE_UNITY_BUILD_BATCH_SIZE 1000)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
         add_compile_options(
-            -O3
+            -O2
             -march=native
             -ffast-math
             -fno-exceptions
