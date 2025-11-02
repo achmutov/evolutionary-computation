@@ -23,7 +23,7 @@ protected:
     Data data;
     std::vector<std::vector<int>> distances;
 
-    static std::mt19937 mt;
+    std::mt19937 mt { 17 };
 
     static std::vector<std::vector<int>> toMatrix(Data const& data);
     static int euclideanDistance(int x1, int y1, int x2, int y2);

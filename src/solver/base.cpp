@@ -47,8 +47,6 @@ int Solver::cost(Indices const& indices) const {
     return result;
 }
 
-std::mt19937 Solver::mt { 17 };
-
 int Solver::euclideanDistance(int x1, int y1, int x2, int y2) {
     return std::round(std::sqrt(std::pow(x1 - x2, 2) + std::pow(y1 - y2, 2)));
 }
