@@ -1,0 +1,2 @@
+add_executable(ls_candidate_moves src/main.cpp)
+target_link_libraries(ls_candidate_moves PRIVATE evolutionary_computation)

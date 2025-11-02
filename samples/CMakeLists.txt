@@ -1,3 +1,4 @@
 add_subdirectory(greedy)
 add_subdirectory(greedy_regret)
 add_subdirectory(local_search)
+add_subdirectory(ls_candidate_moves)
