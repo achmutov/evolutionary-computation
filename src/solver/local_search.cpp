@@ -5,21 +5,57 @@
 LocalSearchSolver::LocalSearchSolver(
     LocalSearchType localSearchType,
     IntraNeighborhoodType intraNeighborhoodType,
-    Solver &initSolver)
+    Solver &initSolver,
+    int nCandidateMoves)
     : localSearchType{localSearchType},
       intraNeighborhoodType{intraNeighborhoodType},
-      initSolver{initSolver} {}
+      initSolver{initSolver},
+      nCandidateMoves{nCandidateMoves} {}
 
 std::string LocalSearchSolver::name() const {
     return std::string("local_search-")
-        + ((localSearchType == LocalSearchType::Steep) ? "steep-" : "greedy-")
-        + ((intraNeighborhoodType == IntraNeighborhoodType::Edges) ? "two_edges-" : "two_nodes-")
-        + "init_" + initSolver.name();
+        + (this->localSearchType == LocalSearchType::Steep ? "steep-" : "greedy-")
+        + (this->intraNeighborhoodType == IntraNeighborhoodType::Edges ? "two_edges-" : "two_nodes-")
+        + "init_" + initSolver.name()
+        + (this->nCandidateMoves == -1 ? "" : "-candidate_moves");
 }
 
 void LocalSearchSolver::init(Data const& data) {
     Solver::init(data);
+    this->learnCandidateMoves();
     this->initSolver.init(data);
+}
+
+void LocalSearchSolver::learnCandidateMoves() {
+    if (this->nCandidateMoves == -1) return;
+
+    auto const n = this->data.entries.size();
+    auto indices = Indices(n);
+    std::iota(indices.begin(), indices.end(), 0);
+
+    this->closestCities = std::vector<Indices>(n);
+    this->isClosestCity = std::vector<std::vector<bool>>(n);
+
+    Indices currentIndices;
+    std::vector<Move>* interMoves;
+    std::vector<Move>* intraMoves;
+    for (auto i : indices) {
+        currentIndices = indices;
+        std::nth_element(
+            currentIndices.begin(),
+            currentIndices.begin() + this->nCandidateMoves,
+            currentIndices.end(),
+            [&](auto a, auto b) {
+                auto aScore = this->data.entries[a].cost + this->distances[i][a];
+                auto bScore = this->data.entries[b].cost + this->distances[i][b];
+                return aScore < bScore;
+            }
+        );
+        currentIndices.resize(this->nCandidateMoves);
+        this->closestCities[i] = currentIndices;
+        this->isClosestCity[i] = std::vector<bool>(n, false);
+        for (auto j : currentIndices) this->isClosestCity[i][j] = true;
+    }
 }
 
 LocalSearchSolver::Indices LocalSearchSolver::_solve(int i) {
@@ -84,19 +120,39 @@ std::vector<LocalSearchSolver::Move> LocalSearchSolver::getMoves(Indices const& 
     auto visited = std::vector(n, false);
     for (auto i : solution) visited[i] = true;
 
-    // Inter
-    for (int i = 0; i < solution.size(); i++)
-        for (int j = 0; j < n; j++)
-            if (!visited[j])
-                moves.emplace_back(i, j, MoveType::Selection);
+    if (nCandidateMoves == -1) {
+        // Inter
+        for (int i = 0; i < sn; i++)
+            for (int j = 0; j < n; j++)
+                if (!visited[j])
+                    moves.emplace_back(i, j, MoveType::Selection);
 
-    // Intra
-    auto intraNeighborhoodType = this->intraNeighborhoodType == IntraNeighborhoodType::Edges
-        ? MoveType::Edges
-        : MoveType::Nodes;
-    for (int i = 0; i < solution.size(); i++)
-        for (int j = i + 1; j < solution.size(); j++)
-            moves.emplace_back(i, j, intraNeighborhoodType);
+        // Intra
+        auto intraNeighborhoodType = this->intraNeighborhoodType == IntraNeighborhoodType::Edges
+            ? MoveType::Edges
+            : MoveType::Nodes;
+        for (int i = 0; i < sn; i++)
+            for (int j = i + 1; j < sn; j++)
+                moves.emplace_back(i, j, intraNeighborhoodType);
+    } else {
+        // Inter
+        for (int i = 0; i < sn; i++)
+            for (auto j : this->closestCities[solution[i]])
+                if (!visited[j])
+                    moves.emplace_back((i + sn - 1) % sn, j, MoveType::Selection);
+
+        // Infra
+        auto intraNeighborhoodType = this->intraNeighborhoodType == IntraNeighborhoodType::Edges
+            ? MoveType::Edges
+            : MoveType::Nodes;
+
+        for (int i = 0; i < sn; i++) {
+            for (int j = i + 1; j < sn; j++)
+                if (this->isClosestCity[solution[i]][solution[i != 0 ? i - 1 : sn - 1]] ||
+                        this->isClosestCity[solution[j]][solution[j != sn - 1 ? j + 1 : 0]])
+                    moves.emplace_back(i, j, intraNeighborhoodType);
+        }
+    }
 
     std::shuffle(moves.begin(), moves.end(), this->mt);
     return moves;

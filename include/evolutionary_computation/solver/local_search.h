@@ -25,7 +25,8 @@ public:
 
     LocalSearchSolver(LocalSearchType localSearchType,
                       IntraNeighborhoodType InterNeighborhoodType,
-                      Solver& initSolver);
+                      Solver& initSolver,
+                      int nCandidateMoves = -1);
 
 
     virtual std::string name() const override;
@@ -34,12 +35,18 @@ public:
 protected:
     const LocalSearchType localSearchType;
     const IntraNeighborhoodType intraNeighborhoodType;
+    const int nCandidateMoves;
+    std::vector<Indices> closestCities;
+    std::vector<std::vector<bool>> isClosestCity;
     Solver& initSolver;
+
+    void learnCandidateMoves();
 
     void doGreedy(Indices& solution);
     void doSteep(Indices& solution);
 
     std::vector<Move> getMoves(Indices const& solution);
+    std::vector<Move> buildMoves(Indices const& solution);
     int evalMove(Indices const& solution, Move& move);
     void applyMove(Indices& solution, Move& move);
 
