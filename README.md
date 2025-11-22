@@ -17,6 +17,13 @@ defined only by distance matrices.
 
 ## How to run
 
+### Quick way
+
+`cmake -S . -B build -DCMAKE_BUILD_TYPE=Release`
+
+`cmake --build build`
+
+
 ### Build the project
 
 `mkdir build && cd build && cmake .. && make`
@@ -27,7 +34,7 @@ defined only by distance matrices.
 
 ### Save results to file
 
-`./build/samples/greedy_regret/greedy_regret 200 ./data/TSPA.csv ./data/TSPB.csv > results.csv`
+`./build/samples/ls_candidate_moves/ls_candidate_moves 200 ./data/TSPA.csv ./data/TSPB.csv > results.csv`
 
 ### Generate visualizations
 
