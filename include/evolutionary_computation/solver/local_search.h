@@ -96,7 +96,7 @@ protected:
 
     void doGreedy(Indices& solution);
     void doSteep(Indices& solution);
-    void doSteepLM(Indices& solution, std::set<int>& remainingNodes);
+    void doSteepLM(Indices& solution, std::set<int>& unselectedNodes);
 
     std::vector<Move> getMoves(Indices const& solution);
     std::vector<Move> buildMoves(Indices const& solution);
@@ -106,23 +106,23 @@ protected:
     int getDelta(int target, int city1, int city2);
     
     // LM-specific methods
-    bool performSteepestStepLM(Indices& solution, std::set<int>& remainingNodes);
-    void populateMoveList(Indices const& solution, std::set<int> const& remainingNodes);
-    ValidationResult validateMove(MoveWithDelta const& move, 
-                                 std::unordered_map<int, int> const& succMap,
-                                 std::unordered_map<int, int> const& predMap,
-                                 std::set<int> const& remaining) const;
-    std::set<int> applyMoveLM(Indices& solution, std::set<int>& remaining, 
+    bool executeSteepestStep(Indices& solution, std::set<int>& unselectedNodes);
+    void initializeMoveList(Indices const& solution, std::set<int> const& unselectedNodes);
+    ValidationResult checkMoveValidity(MoveWithDelta const& move, 
+                                 std::unordered_map<int, int> const& nextMap,
+                                 std::unordered_map<int, int> const& prevMap,
+                                 std::set<int> const& unselected) const;
+    std::set<int> executeMove(Indices& solution, std::set<int>& unselected, 
                               MoveWithDelta const& move, ValidationResult const& val);
-    void updateLocalMoves(Indices const& solution, std::set<int> const& remaining,
-                          std::set<int> const& changedNodes, LMMoveType lastMoveType);
+    void refreshMoveList(Indices const& solution, std::set<int> const& unselected,
+                          std::set<int> const& affectedNodes, LMMoveType lastMoveType);
     
     // Helper methods for LM
-    std::unordered_map<int, int> buildSuccMap(Indices const& solution) const;
-    std::unordered_map<int, int> buildPredMap(Indices const& solution) const;
-    bool hasEdge(std::unordered_map<int, int> const& succMap, int u, int v) const;
-    int deltaInter(Indices const& solution, int selectedIndex, int unselectedNode) const;
-    int deltaTwoOpt(Indices const& solution, int i, int j) const;
-    int findNodeIndex(Indices const& solution, int node) const;
-    void reverseSublist(Indices& solution, int start, int end);
+    std::unordered_map<int, int> createNextNodeMap(Indices const& solution) const;
+    std::unordered_map<int, int> createPrevNodeMap(Indices const& solution) const;
+    bool edgeExists(std::unordered_map<int, int> const& nextMap, int u, int v) const;
+    int computeInterRouteDelta(Indices const& solution, int selectedIndex, int unselectedNode) const;
+    int computeTwoOptDelta(Indices const& solution, int i, int j) const;
+    int getNodePosition(Indices const& solution, int node) const;
+    void reverseSegment(Indices& solution, int start, int end);
 };

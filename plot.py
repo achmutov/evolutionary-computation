@@ -21,14 +21,26 @@ import seaborn as sns  # noqa: E402
 
 sns.set_theme()
 
-inp = pd.read_csv(inp_path)
+# Read CSV - read all columns as strings first to avoid type inference issues
+# Then convert numeric columns back to numeric types
+inp = pd.read_csv(inp_path, dtype=str, keep_default_na=False)
+
+# Convert numeric columns back to appropriate types (but keep best_solution as string)
+numeric_cols = ['min', 'max', 'mean', 'duration_min', 'duration_max', 'duration_mean', 
+                'ls_runs_min', 'ls_runs_max', 'ls_runs_mean']
+for col in numeric_cols:
+    if col in inp.columns:
+        inp[col] = pd.to_numeric(inp[col], errors='coerce')
 
 for (instance, method), row in inp.groupby(["instance", "method"]):
     instance_data = pd.read_csv(instance, delimiter=";", header=None)
     instance_data.columns = ["x", "y", "cost"]
 
-    indices_str = row["best_solution"].values[0]
-    indices = [int(i) for i in indices_str.split(" ")]
+    indices_str = str(row["best_solution"].values[0]).strip()
+    if not indices_str or indices_str.lower() == "nan":
+        print(f"Warning: No best_solution found for {instance} - {method}, skipping...")
+        continue
+    indices = [int(i) for i in indices_str.split(" ") if i.strip()]
 
     # Create complete cycle by adding first node at the end
     cycle_indices = indices + [indices[0]]
