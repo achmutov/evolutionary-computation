@@ -666,3 +666,49 @@ void LocalSearchSolver::reverseSublist(Indices& solution, int start, int end) {
         std::swap(solution[start++], solution[end--]);
     }
 }
+
+// Method to run local search from a given initial solution (for ILS)
+LocalSearchSolver::Indices LocalSearchSolver::_solveFromSolution(Indices const& initialSolution) {
+    auto currentSolution = initialSolution;
+
+    if (this->useMoveList && this->localSearchType == LocalSearchType::Steep) {
+        // Build set of remaining nodes (not in solution)
+        std::set<int> remainingNodes;
+        std::set<int> selected(currentSolution.begin(), currentSolution.end());
+        for (size_t j = 0; j < this->data.entries.size(); j++) {
+            if (selected.find(j) == selected.end()) {
+                remainingNodes.insert(j);
+            }
+        }
+        
+        // Clear move list for new run
+        improvingMoveList.clear();
+        
+        bool improved = true;
+        while (improved) {
+            improved = performSteepestStepLM(currentSolution, remainingNodes);
+        }
+        
+        return currentSolution;
+    }
+
+    int currentCost = std::numeric_limits<int>::max();
+    int lastCost;
+
+    do {
+        lastCost = currentCost;
+
+        switch (this->localSearchType) {
+            case LocalSearchType::Greedy:
+                this->doGreedy(currentSolution);
+                break;
+            case LocalSearchType::Steep:
+                this->doSteep(currentSolution);
+                break;
+        }
+
+        currentCost = this->cost(currentSolution);
+    } while (lastCost > currentCost);
+
+    return currentSolution;
+}

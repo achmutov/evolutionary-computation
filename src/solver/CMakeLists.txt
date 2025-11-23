@@ -7,4 +7,6 @@ target_sources(
         nearest_neighbor_pos.cpp
         greedy_cycle.cpp
         local_search.cpp
+        msls.cpp
+        ils.cpp
 )

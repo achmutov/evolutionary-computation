@@ -79,6 +79,7 @@ public:
     virtual std::string name() const override;
     virtual void init(Data const& data) override;
     virtual Indices _solve(int i) override;
+    Indices _solveFromSolution(Indices const& initialSolution);  // For ILS
 protected:
     const LocalSearchType localSearchType;
     const IntraNeighborhoodType intraNeighborhoodType;

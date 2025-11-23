@@ -17,6 +17,9 @@ public:
     virtual std::tuple<Indices, int, Duration> solve(int i);
     virtual Indices _solve(int i) = 0;
     virtual std::string name() const = 0;
+    
+    // Get number of local search runs (for reporting) - returns -1 if not applicable
+    virtual int getLSRuns() const { return -1; }
 
     virtual ~Solver() = default;
 protected:
