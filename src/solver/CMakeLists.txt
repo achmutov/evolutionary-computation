@@ -9,4 +9,5 @@ target_sources(
         local_search.cpp
         msls.cpp
         ils.cpp
+        lns.cpp
 )

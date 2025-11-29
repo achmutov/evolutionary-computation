@@ -1,6 +1,7 @@
 #include <chrono>
 #include <evolutionary_computation/cli.h>
 #include <evolutionary_computation/solver/ils.h>
+#include <evolutionary_computation/solver/lns.h>
 #include <iostream>
 #include <fstream>
 #include <evolutionary_computation/loader/csv.h>
@@ -35,10 +36,11 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
         auto loader = CSVLoader(stream, instancePath);
         auto data = loader.load();
 
-        // Find MSLS solver and ILS solvers to set dynamic target time
+        // Find MSLS solver, ILS solvers, and LNS solvers to set dynamic target time
         // We identify them by name prefix to avoid RTTI
         Solver* mslsSolver = nullptr;
         std::vector<Solver*> ilsSolvers;
+        std::vector<Solver*> lnsSolvers;
         
         for (auto solver : solvers) {
             std::string name = solver->name();
@@ -46,11 +48,13 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
                 mslsSolver = solver;
             } else if (name.find("ils-") == 0) {
                 ilsSolvers.push_back(solver);
+            } else if (name.find("lns-") == 0) {
+                lnsSolvers.push_back(solver);
             }
         }
         
-        // If we have MSLS and ILS, measure MSLS time and update ILS target
-        if (mslsSolver && !ilsSolvers.empty()) {
+        // If we have MSLS and (ILS or LNS), measure MSLS time and update target times
+        if (mslsSolver && (!ilsSolvers.empty() || !lnsSolvers.empty())) {
             mslsSolver->init(data);
             
             // Measure MSLS average time on a few runs
@@ -68,6 +72,12 @@ void cli(int argc, char* argv[], std::vector<Solver*>& solvers) {
             for (auto* solver : ilsSolvers) {
                 // We know it's an ILSSolver based on name check
                 static_cast<ILSSolver*>(solver)->setTargetTime(avgMSLSTime);
+            }
+            
+            // Update LNS target time (cast to LNSSolver* - safe because we checked name)
+            for (auto* solver : lnsSolvers) {
+                // We know it's an LNSSolver based on name check
+                static_cast<LNSSolver*>(solver)->setTargetTime(avgMSLSTime);
             }
         }
 
