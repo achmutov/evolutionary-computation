@@ -13,7 +13,7 @@ int main(int argc, char* argv[]) {
         LocalSearchType::Steep,
         IntraNeighborhoodType::Edges,
         randomSolver,  // init = Random
-        10,            // candidate moves = 10
+        -1,            // candidate moves = 10
         false          // useMoveList = false (no LM)
     );
     
