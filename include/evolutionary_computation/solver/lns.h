@@ -2,7 +2,6 @@
 
 #include <evolutionary_computation/solver/base.h>
 #include <evolutionary_computation/solver/local_search.h>
-#include <evolutionary_computation/solver/nearest_neighbor_pos.h>
 #include <chrono>
 #include <limits>
 #include <set>
@@ -17,7 +16,6 @@ enum class DestroyType {
 class LNSSolver : public Solver {
 public:
     LNSSolver(LocalSearchSolver& baseLS,
-              NearestNeighborPosSolver& repairSolver,
               Solver::Duration targetTime,
               DestroyType destroyType,
               bool useLocalSearchAfterRepair = true,
@@ -35,7 +33,6 @@ public:
     
 protected:
     LocalSearchSolver& baseLS;
-    NearestNeighborPosSolver& repairSolver;
     Solver::Duration targetTime;  // Non-const to allow per-instance adjustment
     const DestroyType destroyType;
     const bool useLocalSearchAfterRepair;
@@ -43,14 +40,14 @@ protected:
     mutable int iterations;  // Track number of destroy-repair iterations
     
     // Destroy operators
-    std::pair<Indices, std::set<int>> destroy(Indices const& solution);
-    std::pair<Indices, std::set<int>> destroyRandom(Indices const& solution);
-    std::pair<Indices, std::set<int>> destroySingleSubpath(Indices const& solution);
-    std::pair<Indices, std::set<int>> destroyMultipleSubpaths(Indices const& solution);
-    std::pair<Indices, std::set<int>> destroyHeuristic(Indices const& solution);
+    Indices destroy(Indices const& solution);
+    Indices destroyRandom(Indices const& solution);
+    Indices destroySingleSubpath(Indices const& solution);
+    Indices destroyMultipleSubpaths(Indices const& solution);
+    Indices destroyHeuristic(Indices const& solution);
     
-    // Repair operator: insert removed nodes back using greedy heuristic
-    Indices repair(Indices const& partialSolution, std::set<int> const& removedNodes);
+    // Repair operator: insert nodes from all available nodes to reach target count
+    Indices repair(Indices const& partialSolution);
     
     // Helper method for repair: compute delta of inserting city at position
     int getDelta(int city, int pos, Indices const& solution) const;

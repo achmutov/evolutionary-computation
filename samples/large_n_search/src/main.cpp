@@ -1,69 +1,50 @@
 #include <evolutionary_computation/solver/random.h>
 #include <evolutionary_computation/solver/local_search.h>
-#include <evolutionary_computation/solver/nearest_neighbor_pos.h>
-#include <evolutionary_computation/solver/msls.h>
 #include <evolutionary_computation/solver/lns.h>
 #include <evolutionary_computation/cli.h>
-#include <evolutionary_computation/solver/mode.h>
 #include <memory>
 #include <vector>
 #include <chrono>
 
 int main(int argc, char* argv[]) {
-    // Create base local search solver (steepest, edges, random init, with LM)
-    auto randomSolver = RandomSolver();
+    // Create base local search solver: Steep, 2-edges, Random init, with candidate moves
+    auto randomSolver = RandomSolver();  // Random initializer
     auto baseLS = LocalSearchSolver(
         LocalSearchType::Steep,
         IntraNeighborhoodType::Edges,
-        randomSolver,
-        -1,  // no candidate moves
-        true // useMoveList = true (LM)
+        randomSolver,  // init = Random
+        10,            // candidate moves = 10
+        false          // useMoveList = false (no LM)
     );
     
-    // Create repair solver: NearestNeighborPos with weighted regret (50/50)
-    auto repairSolver = NearestNeighborPosSolver(
-        Mode::WeightedRegret,
-        0.5,  // alpha
-        0.5   // beta
-    );
-    
-    // Create MSLS solver for time measurement (200 iterations)
-    auto mslsSolver = std::make_unique<MSLSSolver>(baseLS, 200);
-    
-    // Placeholder target time (will be updated dynamically by CLI based on MSLS measurement)
+    // Target time: 1050ms (measured from MSLS)
     auto targetTime = std::chrono::milliseconds(1050);
     
     auto uniqueSolvers = std::vector<std::unique_ptr<Solver>>();
     
-    // Add MSLS solver for time measurement
-    uniqueSolvers.push_back(std::move(mslsSolver));
+    // LNS variants – Random destroy only
+    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+        baseLS, targetTime, DestroyType::Random, true, 0.3));  // with LS
+    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+        baseLS, targetTime, DestroyType::Random, false, 0.3)); // without LS
     
-    // Create LNS variants with 30% destroy fraction:
-    // Only heuristic destroy for testing
+    // Single subpath destroy (disabled)
+    // uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+    //     baseLS, targetTime, DestroyType::SingleSubpath, true, 0.5));  // with LS
+    // uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+    //     baseLS, targetTime, DestroyType::SingleSubpath, false, 0.5)); // without LS
     
-    // Random destroy - COMMENTED OUT FOR TESTING
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::Random, true, 0.3));  // with LS
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::Random, false, 0.3)); // without LS
+    // Multiple subpaths destroy (ENABLED, 50% destroy)
+    // uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+    //     baseLS, targetTime, DestroyType::MultipleSubpaths, true, 0.3));   // with LS
+    // uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+    //     baseLS, targetTime, DestroyType::MultipleSubpaths, false, 0.3));  // without LS
     
-    // Single subpath destroy - COMMENTED OUT FOR TESTING
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::SingleSubpath, true, 0.3));  // with LS
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::SingleSubpath, false, 0.3)); // without LS
-    
-    // Multiple subpaths destroy - COMMENTED OUT FOR TESTING
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::MultipleSubpaths, true, 0.3));  // with LS
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::MultipleSubpaths, false, 0.3)); // without LS
-    
-    // Heuristic destroy (30% destroy, using detour cost)
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::Heuristic, true, 0.3));  // with LS
-    uniqueSolvers.push_back(std::make_unique<LNSSolver>(
-        baseLS, repairSolver, targetTime, DestroyType::Heuristic, false, 0.3)); // without LS
+    // Heuristic destroy (disabled)
+    // uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+    //     baseLS, targetTime, DestroyType::Heuristic, true, 0.5));  // with LS
+    // uniqueSolvers.push_back(std::make_unique<LNSSolver>(
+    //     baseLS, targetTime, DestroyType::Heuristic, false, 0.5)); // without LS
     
     auto solvers = std::vector<Solver*>();
     for (auto& solver : uniqueSolvers) {

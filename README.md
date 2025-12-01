@@ -34,7 +34,7 @@ defined only by distance matrices.
 
 ### Save results to file
 
-`./build/samples/msls_ils/msls_ils 200 ./data/TSPA.csv ./data/TSPB.csv > results.csv`
+`./build/samples/large_n_search/large_n_search 20 ./data/TSPA.csv ./data/TSPB.csv > results.csv`
 
 ### Generate visualizations
 

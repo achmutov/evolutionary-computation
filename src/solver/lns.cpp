@@ -7,13 +7,11 @@
 #include <numeric>
 
 LNSSolver::LNSSolver(LocalSearchSolver& baseLS,
-                     NearestNeighborPosSolver& repairSolver,
                      Solver::Duration targetTime,
                      DestroyType destroyType,
                      bool useLocalSearchAfterRepair,
                      double destroyFraction)
     : baseLS{baseLS},
-      repairSolver{repairSolver},
       targetTime{targetTime},
       destroyType{destroyType},
       useLocalSearchAfterRepair{useLocalSearchAfterRepair},
@@ -44,7 +42,6 @@ std::string LNSSolver::name() const {
 void LNSSolver::init(Data const& data) {
     Solver::init(data);
     baseLS.init(data);
-    repairSolver.init(data);
     iterations = 0;
 }
 
@@ -72,10 +69,10 @@ Solver::Indices LNSSolver::_solve(int i) {
         }
         
         // Destroy: remove nodes from solution
-        auto [partialSolution, removedNodes] = destroy(x);
+        Indices partialSolution = destroy(x);
         
-        // Repair: insert removed nodes back using greedy heuristic
-        Indices y = repair(partialSolution, removedNodes);
+        // Repair: insert nodes from all available nodes to reach target count
+        Indices y = repair(partialSolution);
         
         // Optional local search after repair
         if (useLocalSearchAfterRepair) {
@@ -96,7 +93,7 @@ Solver::Indices LNSSolver::_solve(int i) {
     return x;
 }
 
-std::pair<Solver::Indices, std::set<int>> LNSSolver::destroy(Indices const& solution) {
+Solver::Indices LNSSolver::destroy(Indices const& solution) {
     switch (destroyType) {
         case DestroyType::Random:
             return destroyRandom(solution);
@@ -107,10 +104,10 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroy(Indices const& solu
         case DestroyType::Heuristic:
             return destroyHeuristic(solution);
     }
-    return {solution, std::set<int>()};
+    return solution;
 }
 
-std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyRandom(Indices const& solution) {
+Solver::Indices LNSSolver::destroyRandom(Indices const& solution) {
     int n = solution.size();
     int numToRemove = static_cast<int>(std::round(n * destroyFraction));
     
@@ -120,50 +117,49 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyRandom(Indices const
     std::shuffle(indices.begin(), indices.end(), this->mt);
     
     // Select nodes to remove
-    std::set<int> removedNodes;
-    Indices partialSolution;
-    
+    std::set<int> removedSet;
     for (int i = 0; i < numToRemove; i++) {
-        removedNodes.insert(solution[indices[i]]);
+        removedSet.insert(solution[indices[i]]);
     }
     
     // Build partial solution (nodes not removed)
+    Indices partialSolution;
     for (int node : solution) {
-        if (removedNodes.find(node) == removedNodes.end()) {
+        if (removedSet.find(node) == removedSet.end()) {
             partialSolution.push_back(node);
         }
     }
     
-    return {partialSolution, removedNodes};
+    return partialSolution;
 }
 
-std::pair<Solver::Indices, std::set<int>> LNSSolver::destroySingleSubpath(Indices const& solution) {
+Solver::Indices LNSSolver::destroySingleSubpath(Indices const& solution) {
     int n = solution.size();
     int numToRemove = static_cast<int>(std::round(n * destroyFraction));
     
     // Pick random starting position
     int startIdx = this->mt() % n;
     
-    std::set<int> removedNodes;
-    Indices partialSolution;
+    std::set<int> removedSet;
     
     // Remove contiguous subpath
     for (int i = 0; i < numToRemove; i++) {
         int idx = (startIdx + i) % n;
-        removedNodes.insert(solution[idx]);
+        removedSet.insert(solution[idx]);
     }
     
     // Build partial solution (nodes not removed)
+    Indices partialSolution;
     for (int node : solution) {
-        if (removedNodes.find(node) == removedNodes.end()) {
+        if (removedSet.find(node) == removedSet.end()) {
             partialSolution.push_back(node);
         }
     }
     
-    return {partialSolution, removedNodes};
+    return partialSolution;
 }
 
-std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyMultipleSubpaths(Indices const& solution) {
+Solver::Indices LNSSolver::destroyMultipleSubpaths(Indices const& solution) {
     int n = solution.size();
     int numToRemove = static_cast<int>(std::round(n * destroyFraction));
     
@@ -172,7 +168,7 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyMultipleSubpaths(Ind
     int nodesPerSubpath = numToRemove / numSubpaths;
     int remainder = numToRemove % numSubpaths;
     
-    std::set<int> removedNodes;
+    std::set<int> removedSet;
     std::vector<bool> removed(n, false);
     
     // Remove multiple subpaths
@@ -206,7 +202,7 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyMultipleSubpaths(Ind
             int idx = (startIdx + i) % n;
             if (!removed[idx]) {
                 removed[idx] = true;
-                removedNodes.insert(solution[idx]);
+                removedSet.insert(solution[idx]);
             }
         }
     }
@@ -214,15 +210,15 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyMultipleSubpaths(Ind
     // Build partial solution (nodes not removed)
     Indices partialSolution;
     for (int node : solution) {
-        if (removedNodes.find(node) == removedNodes.end()) {
+        if (removedSet.find(node) == removedSet.end()) {
             partialSolution.push_back(node);
         }
     }
     
-    return {partialSolution, removedNodes};
+    return partialSolution;
 }
 
-std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyHeuristic(Indices const& solution) {
+Solver::Indices LNSSolver::destroyHeuristic(Indices const& solution) {
     int n = solution.size();
     int numToRemove = static_cast<int>(std::round(n * destroyFraction));
     
@@ -283,7 +279,7 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyHeuristic(Indices co
     }
     
     // Roulette wheel selection
-    std::set<int> removedNodes;
+    std::set<int> removedSet;
     std::vector<bool> selected(n, false);
     
     std::uniform_real_distribution<double> dist(0.0, 1.0);
@@ -313,24 +309,25 @@ std::pair<Solver::Indices, std::set<int>> LNSSolver::destroyHeuristic(Indices co
         }
         
         selected[selectedIdx] = true;
-        removedNodes.insert(nodeIndices[selectedIdx]);
+        removedSet.insert(nodeIndices[selectedIdx]);
         removed++;
     }
     
     // Build partial solution (nodes not removed)
     Indices partialSolution;
     for (int node : solution) {
-        if (removedNodes.find(node) == removedNodes.end()) {
+        if (removedSet.find(node) == removedSet.end()) {
             partialSolution.push_back(node);
         }
     }
     
-    return {partialSolution, removedNodes};
+    return partialSolution;
 }
 
-Solver::Indices LNSSolver::repair(Indices const& partialSolution, std::set<int> const& removedNodes) {
-    // Convert removed nodes to vector for easier iteration
-    std::vector<int> toInsert(removedNodes.begin(), removedNodes.end());
+Solver::Indices LNSSolver::repair(Indices const& partialSolution) {
+    // Calculate target count: 50% of all nodes (rounded)
+    int targetCount = static_cast<int>(std::round(static_cast<float>(this->data.entries.size()) / 2));
+    int numToInsert = targetCount - partialSolution.size();
     
     // Start with partial solution
     Indices solution = partialSolution;
@@ -341,19 +338,28 @@ Solver::Indices LNSSolver::repair(Indices const& partialSolution, std::set<int> 
         visited[node] = true;
     }
     
+    // Build list of ALL available nodes (not in partial solution)
+    std::vector<int> availableNodes;
+    for (size_t i = 0; i < this->data.entries.size(); i++) {
+        if (!visited[i]) {
+            availableNodes.push_back(i);
+        }
+    }
+    
     // Use weighted regret to insert nodes (same logic as NearestNeighborPosSolver)
     // repairSolver has alpha=0.5, beta=0.5 for weighted regret
     double alpha = 0.5;
     double beta = 0.5;
     
-    while (!toInsert.empty()) {
+    // Insert nodes until we reach targetCount
+    for (int insertCount = 0; insertCount < numToInsert && !availableNodes.empty(); insertCount++) {
         int bestCity = -1;
         int bestPos = -1;
         double maxScore = std::numeric_limits<double>::lowest();
         int minDeltaForMaxScore = std::numeric_limits<int>::max();
         
-        // For each uninserted node, find best position and compute regret
-        for (int city : toInsert) {
+        // For each available node, find best position and compute regret
+        for (int city : availableNodes) {
             if (visited[city]) continue;
             
             // Find best and second-best positions for this city
@@ -391,17 +397,17 @@ Solver::Indices LNSSolver::repair(Indices const& partialSolution, std::set<int> 
             solution.insert(solution.begin() + bestPos, bestCity);
             visited[bestCity] = true;
             
-            // Remove from toInsert
-            toInsert.erase(std::remove(toInsert.begin(), toInsert.end(), bestCity), toInsert.end());
+            // Remove from availableNodes
+            availableNodes.erase(std::remove(availableNodes.begin(), availableNodes.end(), bestCity), availableNodes.end());
         } else {
-            // Fallback: insert remaining nodes greedily
+            // Fallback: insert remaining greedily
             break;
         }
     }
     
-    // Fallback: insert any remaining nodes greedily
-    for (int city : toInsert) {
-        if (visited[city]) continue;
+    // Fallback: greedy insertion for any remaining nodes
+    for (int city : availableNodes) {
+        if (visited[city] || solution.size() >= targetCount) continue;
         
         int bestPos = -1;
         int minDelta = std::numeric_limits<int>::max();
